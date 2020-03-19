@@ -1,0 +1,10 @@
+[salesforce]
+username = 
+password = 
+security_token = 
+connect_to_sandbox = False
+output_dir = C:\Files_Extract\
+download_attachments = True
+download_notes = True
+batch_size = 100
+loglevel = INFO
