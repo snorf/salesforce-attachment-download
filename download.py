@@ -34,6 +34,8 @@ def get_record_ids(sf, output_directory, query, object_type):
         results_path = output_directory + 'files.csv'
     elif object_type == NOTE:
         results_path = output_directory + 'content_notes.csv'
+    else:
+        results_path = output_directory + 'unknown.csv'
 
     record_ids = set()
     records = sf.query_all(query)
@@ -150,10 +152,10 @@ def main():
     loglevel = logging.getLevelName(config['salesforce']['loglevel'])
     logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=loglevel)
 
-    attachment_query = 'SELECT Id, ContentType, Description, Name, OwnerId, ParentId, CreatedById, CreatedDate, LastModifiedDate FROM Attachment WHERE ParentId IN ({0}) LIMIT 200'.format(
-        args.query)
-    notes_query = 'SELECT Id, Title, OwnerId, ParentId, CreatedById, CreatedDate, LastModifiedDate FROM Note WHERE ParentId IN ({0}) LIMIT 200'.format(
-        args.query)
+    attachment_query = 'SELECT Id, ContentType, Description, Name, OwnerId, ParentId, CreatedById, CreatedDate, ' \
+                       'LastModifiedDate FROM Attachment WHERE ParentId IN ({0})'.format(args.query)
+    notes_query = 'SELECT Id, Title, OwnerId, ParentId, CreatedById, CreatedDate, LastModifiedDate ' \
+                  'FROM Note WHERE ParentId IN ({0})'.format(args.query)
     output = config['salesforce']['output_dir']
 
     attachment_query_string = "SELECT Id, ContentType, Description, Name, OwnerId, ParentId FROM Attachment"
@@ -161,7 +163,7 @@ def main():
 
     domain = None
     if is_sandbox == 'True':
-        domain = 'test';
+        domain = 'test'
 
     # Output
     logging.info('Export Attachments from Salesforce')
