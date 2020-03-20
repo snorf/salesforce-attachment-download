@@ -25,7 +25,7 @@ ATTACHMENT = 'attachment'
 NOTE = 'note'
 
 
-def get_record_ids(sf, output_directory, query, object_type):
+def get_record_ids(sf, output_directory, query, object_type, sharetype='V', visibility='AllUsers'):
     # Locate/Create output directory
     if not os.path.isdir(output_directory):
         os.mkdir(output_directory)
@@ -45,11 +45,12 @@ def get_record_ids(sf, output_directory, query, object_type):
         file_writer = csv.writer(results_csv, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         if object_type == ATTACHMENT:
             file_writer.writerow(
-                ['LinkedEntityId', 'ContentDocumentId', 'Filepath', 'PathOnClient', 'Title', 'OwnerId', 'CreatedDate',
-                 'CreatedById', 'LastModifiedDate'])
+                ['FirstPublishLocationId', 'AttachmentId', 'VersionData', 'PathOnClient', 'Title', 'OwnerId',
+                 'CreatedDate', 'CreatedById', 'LastModifiedDate'])
         elif object_type == NOTE:
             file_writer.writerow(
-                ['Id', 'Title', 'OwnerId', 'Content', 'CreatedDate', 'CreatedById', 'LastModifiedDate'])
+                ['LinkedEntityId', 'LegacyNoteId', 'Title', 'OwnerId', 'Content', 'CreatedDate', 'CreatedById',
+                 'LastModifiedDate', 'ShareType', 'Visibility'])
 
         for content_document in records["records"]:
             record_ids.add(content_document["Id"])
@@ -66,9 +67,10 @@ def get_record_ids(sf, output_directory, query, object_type):
                                            content_document["Id"],
                                            output_directory)
                 file_writer.writerow(
-                    [content_document["Id"], content_document["Title"], content_document["OwnerId"], filename,
-                     content_document['CreatedDate'], content_document['CreatedById'],
-                     content_document['LastModifiedDate']])
+                    [content_document["ParentId"], content_document["Id"], content_document["Title"],
+                     content_document["OwnerId"], filename, content_document['CreatedDate'],
+                     content_document['CreatedById'], content_document['LastModifiedDate'],
+                     sharetype, visibility])
 
     return record_ids
 
@@ -150,6 +152,8 @@ def main():
     download_notes = config['salesforce']['download_notes'] == 'True'
     batch_size = int(config['salesforce']['batch_size'])
     loglevel = logging.getLevelName(config['salesforce']['loglevel'])
+    sharetype = logging.getLevelName(config['salesforce']['sharetype'])
+    visibility = logging.getLevelName(config['salesforce']['visibility'])
     logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=loglevel)
 
     attachment_query = 'SELECT Id, ContentType, Description, Name, OwnerId, ParentId, CreatedById, CreatedDate, ' \
@@ -189,7 +193,8 @@ def main():
         logging.info("Found {0} total notes".format(len(valid_record_ids)))
         fetch_files(sf=sf, query_string=note_query_string,
                     valid_record_ids=valid_record_ids,
-                    output_directory=output, object_type=NOTE, batch_size=batch_size)
+                    output_directory=output, object_type=NOTE, batch_size=batch_size,
+                    sharetype=sharetype, visibility=visibility)
 
 
 if __name__ == "__main__":
