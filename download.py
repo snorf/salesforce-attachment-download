@@ -189,12 +189,11 @@ def main():
     if notes_query and download_notes:
         logging.info("Querying to get Note Ids...")
         valid_record_ids = get_record_ids(sf=sf, output_directory=output, query=notes_query,
-                                          object_type=NOTE)
+                                          object_type=NOTE, sharetype=sharetype, visibility=visibility)
         logging.info("Found {0} total notes".format(len(valid_record_ids)))
         fetch_files(sf=sf, query_string=note_query_string,
                     valid_record_ids=valid_record_ids,
-                    output_directory=output, object_type=NOTE, batch_size=batch_size,
-                    sharetype=sharetype, visibility=visibility)
+                    output_directory=output, object_type=NOTE, batch_size=batch_size)
 
 
 if __name__ == "__main__":
